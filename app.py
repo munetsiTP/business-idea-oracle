@@ -3,9 +3,8 @@ import requests
 import stripe
 import os
 
-# API Keys from secrets
+# Stripe key from secrets
 stripe.api_key = os.environ.get("STRIPE_API_KEY", "sk_test_your_test_key_here")
-serpapi_key = os.environ.get("SERPAPI_KEY", "your_serpapi_key_here")  # Must be real key
 
 # Your app domain for redirects
 DOMAIN = "https://business-idea-oracle.streamlit.app"  # Update if different
@@ -14,7 +13,7 @@ st.title("Oracle Premium Validation by munetsiTP")
 st.markdown("Validate your idea for free (basic). Unlock full report for $5!")
 
 # Input
-idea = st.text_area("Business Idea Description", "e.g., Selling car parts from china in canada.")
+idea = st.text_area("Business Idea Description", "e.g., Confectionary business in Calgary.")
 
 if st.button("Validate Idea (Free Basic)"):
     if not idea:
@@ -22,18 +21,21 @@ if st.button("Validate Idea (Free Basic)"):
     else:
         with st.spinner("Fetching real-time data..."):
             def fetch_data(query):
-                url = f"https://serpapi.com/search?engine=duckduckgo&q={query}&api_key={serpapi_key}"
+                url = f"https://api.duckduckgo.com/?q={query}&format=json"
                 try:
-                    response = requests.get(url)
+                    response = requests.get(url, timeout=10)
                     if response.status_code == 200:
                         data = response.json()
-                        if 'organic_results' in data and data['organic_results']:
-                            return data['organic_results'][0].get('snippet', 'No data found.')
+                        # Extract best snippet: Abstract first, then RelatedTopics
+                        if data.get('AbstractText'):
+                            return data['AbstractText']
+                        elif data.get('RelatedTopics') and data['RelatedTopics']:
+                            return data['RelatedTopics'][0].get('Text', 'No relevant data found.')
                         return 'No relevant data found.'
                     else:
                         return f"Fallback due to error {response.status_code}: Use general market research for '{query}'."
                 except Exception as e:
-                    return f"Fallback due to connection issue: {str(e)}. Check API key and try again."
+                    return f"Fallback due to connection issue: {str(e)}. Check network and try again."
 
             market_query = f"{idea} market size 2025"
             market_data = fetch_data(market_query)
@@ -42,13 +44,13 @@ if st.button("Validate Idea (Free Basic)"):
             comp_data = fetch_data(comp_query)
             
             # Basic free output
-            score = 8.6  # Dynamic placeholder
+            score = 8.6  # Placeholder; can dynamize later
             st.subheader("Basic Free Validation")
             st.write(f"**Market Insights**: {market_data}")
             st.write(f"**Competition & Risks**: {comp_data}")
             st.write(f"**Viability Score**: {score}/10 - Looks promising!")
 
-            # Premium unlock logic (unchanged from before)
+            # Premium unlock logic
             query_params = st.query_params
             if 'session_id' in query_params:
                 session_id = query_params['session_id'][0]
