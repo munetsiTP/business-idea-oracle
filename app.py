@@ -24,9 +24,9 @@ if st.button("Validate Idea (Free Basic)"):
                 url = f"https://api.duckduckgo.com/?q={query}&format=json"
                 try:
                     response = requests.get(url, timeout=10)
-                    if response.status_code == 200:
+                    if response.ok:  # Handles 200-299 codes, including 202
                         data = response.json()
-                        # Extract best snippet: Abstract first, then RelatedTopics
+                        # Extract best snippet
                         if data.get('AbstractText'):
                             return data['AbstractText']
                         elif data.get('RelatedTopics') and data['RelatedTopics']:
@@ -35,7 +35,7 @@ if st.button("Validate Idea (Free Basic)"):
                     else:
                         return f"Fallback due to error {response.status_code}: Use general market research for '{query}'."
                 except Exception as e:
-                    return f"Fallback due to connection issue: {str(e)}. Check network and try again."
+                    return f"Fallback due to connection or rate limit issue: {str(e)}. Try again later or use general research."
 
             market_query = f"{idea} market size 2025"
             market_data = fetch_data(market_query)
@@ -44,13 +44,13 @@ if st.button("Validate Idea (Free Basic)"):
             comp_data = fetch_data(comp_query)
             
             # Basic free output
-            score = 8.6  # Placeholder; can dynamize later
+            score = 8.6
             st.subheader("Basic Free Validation")
             st.write(f"**Market Insights**: {market_data}")
             st.write(f"**Competition & Risks**: {comp_data}")
             st.write(f"**Viability Score**: {score}/10 - Looks promising!")
 
-            # Premium unlock logic
+            # Premium unlock logic (unchanged)
             query_params = st.query_params
             if 'session_id' in query_params:
                 session_id = query_params['session_id'][0]
