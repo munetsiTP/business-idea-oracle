@@ -92,3 +92,19 @@ if st.button("Validate Idea (Free Basic)"):
                 if st.button("Pay $5 with Stripe"):
                     try:
                         session = stripe.checkout.Session.create(
+                            payment_method_types=['card'],
+                            line_items=[{
+                                'price_data': {
+                                    'currency': 'usd',
+                                    'product_data': {'name': 'Oracle Premium Validation by munetsiTP'},
+                                    'unit_amount': 500,
+                                },
+                                'quantity': 1,
+                            }],
+                            mode='payment',
+                            success_url=DOMAIN + '?session_id={CHECKOUT_SESSION_ID}',
+                            cancel_url=DOMAIN,
+                        )
+                        st.markdown(f"<a href='{session.url}' target='_blank'>Click to Pay</a>", unsafe_allow_html=True)
+                    except Exception as e:
+                        st.error(f"Error creating session: {str(e)}")
