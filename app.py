@@ -21,25 +21,24 @@ if st.button("Validate Idea (Free Basic)"):
     else:
         with st.spinner("Fetching real-time data..."):
             def fetch_data(query):
-                # Broaden query for better results
-                broad_query = query.replace("Confectionary", "Confectionery") + " Canada" if "Canada" not in query else query
+                # Broaden for niche locations like Calgary
+                broad_query = query.replace("Calgary", "Canada") if "Calgary" in query else query
                 url = f"https://api.duckduckgo.com/?q={broad_query}&format=json"
                 try:
                     response = requests.get(url, timeout=10)
                     if response.ok:
                         data = response.json()
-                        # Improved extraction: Abstract, Answer, or RelatedTopics
                         if data.get('AbstractText'):
                             return data['AbstractText']
                         if data.get('Answer'):
                             return data['Answer']
                         elif data.get('RelatedTopics') and data['RelatedTopics']:
                             return data['RelatedTopics'][0].get('Text', 'No relevant data found.')
-                        return 'No relevant data found. Try a broader query.'
+                        return 'No relevant data found. Try a broader query or general trends (e.g., Canada confectionery ~$7.5B in 2025).'
                     else:
-                        return f"Fallback due to error {response.status_code}: Use general market research for '{query}' (e.g., Canada confectionery ~$7.5B in 2025)."
+                        return f"Fallback due to error {response.status_code}: General insight for '{query}' - Market ~$7.5B Canada-wide in 2025 with risks like price-fixing."
                 except Exception as e:
-                    return f"Fallback due to connection issue: {str(e)}. General insight: Check for tariffs and local regulations in confectionery."
+                    return f"Fallback due to connection issue: {str(e)}. General insight: Confectionery risks include competition from chains and regulatory scandals."
 
             market_query = f"{idea} market size 2025"
             market_data = fetch_data(market_query)
@@ -93,19 +92,3 @@ if st.button("Validate Idea (Free Basic)"):
                 if st.button("Pay $5 with Stripe"):
                     try:
                         session = stripe.checkout.Session.create(
-                            payment_method_types=['card'],
-                            line_items=[{
-                                'price_data': {
-                                    'currency': 'usd',
-                                    'product_data': {'name': 'Oracle Premium Validation by munetsiTP'},
-                                    'unit_amount': 500,
-                                },
-                                'quantity': 1,
-                            }],
-                            mode='payment',
-                            success_url=DOMAIN + '?session_id={CHECKOUT_SESSION_ID}',
-                            cancel_url=DOMAIN,
-                        )
-                        st.markdown(f"<a href='{session.url}' target='_blank'>Click to Pay</a>", unsafe_allow_html=True)
-                    except Exception as e:
-                        st.error(f"Error creating session: {str(e)}")
