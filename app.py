@@ -4,7 +4,7 @@ import stripe
 import os
 
 # Stripe setup (use Streamlit secrets for real key)
-stripe.api_key = os.environ.get("STRIPE_API_KEY", "pk_test_51RlKStR5RqSIOxEegb69rYOUIiXmOjdMH6bZu6gFTthpKtJ42tUwZI7JmPYN9a6HGEQmKp5R1B1PUsfIBHUFjrp300y5hXvCZu")  # Replace with your key or use secrets
+stripe.api_key = os.environ.get("STRIPE_API_KEY", "sk_test_your_test_key_here")  # Replace with your key or use secrets
 
 st.title("Oracle Premium Validation by munetsiTP")
 st.markdown("Validate your idea for free (basic). Unlock full report for $5!")
